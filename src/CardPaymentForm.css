@@ -1,0 +1,153 @@
+/* Global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;     /* Centers vertically */
+    height: 100vh;    
+    width: 100vw;       /* Full viewport height */
+  }
+  
+  /* Payment form container */
+  .payment-container {
+    width: 400px;
+    margin: 20px auto;
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Header section */
+  .header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .logo {
+    width: 40px;
+    height: 40px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .company-info h2 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .trusted {
+    font-size: 12px;
+    color: #4caf50;
+  }
+  
+  /* Card form section */
+  .card-form {
+    margin-top: 10px;
+  }
+  
+  .card-form h3 {
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* Input row and input groups */
+  .input-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .input-group {
+    width: 48%;
+    position: relative;
+  }
+  
+  .input-group label {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    outline: none;
+  }
+  
+  .input-field:focus {
+    border-color: #007bff;
+  }
+  
+  .card-brand {
+    position: absolute;
+    right: 10px;
+    top: 45px;
+    width: 30px;
+  }
+  
+  /* Checkbox container */
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .checkbox-container input {
+    margin-right: 8px;
+  }
+  
+  /* Pay button */
+  .pay-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .pay-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Footer section */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    font-size: 16px;
+  }
+  
+  .footer p {
+    font-weight: bold;
+  }
+  
+  .footer span {
+    color: #007bff;
+    cursor: pointer;
+  }
