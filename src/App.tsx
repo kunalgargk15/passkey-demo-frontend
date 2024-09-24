@@ -1,7 +1,39 @@
 import CardPaymentForm from "./CardPaymentForm";
+import { useState } from 'react';
 
 function App() {
   let rawId = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
+  const [responseData, setResponseData] = useState({
+    ID: "",
+    RawID: "",
+    Type: "",
+    response: {
+      ClientDataJson: {},
+      AttestationObject: {},
+    }
+  });
+
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(responseData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to make request');
+      }
+
+      const data = await response.json();
+      setResponseData(data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const createPasskey = async () => {
     const currentDomain = window.location.hostname;
@@ -25,18 +57,13 @@ function App() {
       attestation: "direct",
     };
 
-    // const decoder = new TextDecoder('utf-8');
-    // console.log(decoder.decode(publicKeyCredentialCreationOptions.challenge))
-    // console.log(publicKeyCredentialCreationOptions.challenge.toString());
-
     try {
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions,
       });
       console.log("🚀 ~ createPasskey ~ credential:", credential);
-
-      // rawId = credential.rawId;
-      console.log("🚀 ~ createPasskey ~ rawId:", rawId)
+      console.log("🚀 ~ createPasskey ~ credential.rawId:", credential.rawId);
+      rawId = credential.rawId;
     } catch (error) {
       console.error("Error creating passkey:", error);
     }
@@ -60,6 +87,17 @@ function App() {
       publicKey: publicKeyCredentialRequestOptions,
     });
     console.log("🚀 ~ verifyPasskey ~ assertion:", assertion);
+    setResponseData({
+      ID: assertion.id || "",
+      RawID: assertion.rawId || "",
+      Type: assertion.type || "",
+      response: {
+        ClientDataJson: {},
+        AttestationObject: {},
+      }
+    })
+    console.log("🚀 ~ verifyPasskey ~ responseData:", responseData);
+    handleSave();
   };
 
   return (
