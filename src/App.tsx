@@ -5,16 +5,27 @@ function App() {
   let rawId = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
   const [responseData, setResponseData] = useState({
     ID: "",
-    RawID: "",
+    RawID: new ArrayBuffer(8),
     Type: "",
     response: {
-      ClientDataJson: {},
-      AttestationObject: {},
-    }
+      ClientDataJson: new ArrayBuffer(8),
+      AttestationObject: new ArrayBuffer(8),
+    },
+    Random: Math.random(),
   });
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);  // Base64 encode
+  };
 
 
   const handleSave = async () => {
+    console.log("🚀 ~ handleSave ~ responseData:", responseData)
     try {
       const response = await fetch('http://localhost:8080/save', {
         method: 'POST',
@@ -88,15 +99,15 @@ function App() {
     });
     console.log("🚀 ~ verifyPasskey ~ assertion:", assertion);
     setResponseData({
-      ID: assertion.id || "",
-      RawID: assertion.rawId || "",
-      Type: assertion.type || "",
+      ID: assertion.id,
+      RawID: arrayBufferToBase64(assertion.rawId),
+      Type: assertion.type,
       response: {
-        ClientDataJson: {},
-        AttestationObject: {},
+        ClientDataJson: arrayBufferToBase64(assertion.response.clientDataJSON),
+        AttestationObject: arrayBufferToBase64(assertion.response.authenticatorData),
       }
     })
-    console.log("🚀 ~ verifyPasskey ~ responseData:", responseData);
+    console.log("🚀 ~ verifyPasskey ~ setResponseData:", responseData);
     handleSave();
   };
 
