@@ -3,16 +3,16 @@ import { useState } from 'react';
 
 function App() {
   let rawId = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
-  const [responseData, setResponseData] = useState({
-    ID: "",
-    RawID: new ArrayBuffer(8),
-    Type: "",
-    response: {
-      ClientDataJson: new ArrayBuffer(8),
-      AttestationObject: new ArrayBuffer(8),
-    },
-    Random: Math.random(),
-  });
+  // const [responseData, setResponseData] = useState({
+  //   ID: "",
+  //   RawID: new ArrayBuffer(8),
+  //   Type: "",
+  //   response: {
+  //     ClientDataJson: new ArrayBuffer(8),
+  //     AttestationObject: new ArrayBuffer(8),
+  //   },
+  //   Random: Math.random(),
+  // });
   const arrayBufferToBase64 = (buffer) => {
     let binary = '';
     const bytes = new Uint8Array(buffer);
@@ -24,7 +24,7 @@ function App() {
   };
 
 
-  const handleSave = async () => {
+  const handleSave = async (responseData) => {
     console.log("🚀 ~ handleSave ~ responseData:", responseData)
     try {
       const response = await fetch('http://localhost:8080/save', {
@@ -40,7 +40,6 @@ function App() {
       }
 
       const data = await response.json();
-      setResponseData(data);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -98,17 +97,17 @@ function App() {
       publicKey: publicKeyCredentialRequestOptions,
     });
     console.log("🚀 ~ verifyPasskey ~ assertion:", assertion);
-    setResponseData({
-      ID: assertion.id,
-      RawID: arrayBufferToBase64(assertion.rawId),
-      Type: assertion.type,
-      response: {
-        ClientDataJson: arrayBufferToBase64(assertion.response.clientDataJSON),
-        AttestationObject: arrayBufferToBase64(assertion.response.authenticatorData),
+    handleSave(
+      {
+        ID: assertion.id,
+        RawID: arrayBufferToBase64(assertion.rawId),
+        Type: assertion.type,
+        response: {
+          ClientDataJson: arrayBufferToBase64(assertion.response.clientDataJSON),
+          AttestationObject: arrayBufferToBase64(assertion.response.authenticatorData),
+        }
       }
-    })
-    console.log("🚀 ~ verifyPasskey ~ setResponseData:", responseData);
-    handleSave();
+    );
   };
 
   return (
