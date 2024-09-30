@@ -1,5 +1,6 @@
 import CardPaymentForm from "./CardPaymentForm";
 import { useState } from 'react';
+import { decode, encode } from 'cbor-x';
 
 function App() {
   let rawId = new Uint8Array([0, 1, 2, 3, 4, 5, 6]);
@@ -23,8 +24,23 @@ function App() {
     return btoa(binary);  // Base64 encode
   };
 
+  function base64ToArrayBuffer(base64) {
+    // Decode the base64 string
+    // const binaryString = atob(base64);
+    
+    // Create an array of bytes from the decoded string
+    const len = base64.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = base64.charCodeAt(i);
+    }
+    
+    // Convert the byte array to an ArrayBuffer
+    return bytes.buffer;
+  }
 
-  const handleSave = async (responseData) => {
+
+  const handleSaveAfterRegsiterationOutput = async (responseData) => {
     console.log("🚀 ~ handleSave ~ responseData:", responseData)
     try {
       const response = await fetch('http://localhost:8080/save', {
@@ -32,7 +48,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(responseData),
+        body:  JSON.stringify(responseData),
       });
 
       if (!response.ok) {
@@ -45,77 +61,126 @@ function App() {
     }
   };
 
-  const createPasskey = async () => {
-    const currentDomain = window.location.hostname;
-    const publicKeyCredentialCreationOptions = {
-      challenge: new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
-      rp: {
-        name: "Razorpay",
-        id: currentDomain,
-        displayName: "Razorpay",
-      },
-      user: {
-        id: new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
-        name: "Kunal Garg",
-        displayName: "Kunal Garg",
-      },
-      pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-      authenticatorSelection: {
-        authenticatorAttachment: "platform",
-      },
-      timeout: 60000,
-      attestation: "direct",
-    };
+  // const createPasskey = async () => {
+  //   const currentDomain = window.location.hostname;
+  //   const publicKeyCredentialCreationOptions = {
+  //     challenge: new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
+  //     rp: {
+  //       name: "Razorpay",
+  //       id: currentDomain,
+  //       displayName: "Razorpay",
+  //     },
+  //     user: {
+  //       id: new Uint8Array([0, 1, 2, 3, 4, 5, 6]),
+  //       name: "Kunal Garg",
+  //       displayName: "Kunal Garg",
+  //     },
+  //     pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+  //     authenticatorSelection: {
+  //       authenticatorAttachment: "platform",
+  //     },
+  //     timeout: 60000,
+  //     attestation: "direct",
+  //   };
 
-    try {
+
+  async function registerUser() {
+    
+      // Fetch public key credential creation options from the backend
+      const response = await fetch('http://localhost:8080/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch public key creation options from backend');
+      }
+
+      const publicKeyCredentialCreationOptions = await response.json();
+
+      publicKeyCredentialCreationOptions.challenge = base64ToArrayBuffer(publicKeyCredentialCreationOptions.challenge)
+      publicKeyCredentialCreationOptions.user.id = base64ToArrayBuffer(publicKeyCredentialCreationOptions.user.id)
+
+
+      console.log("Printing the create options received from backend", publicKeyCredentialCreationOptions)
+    // try {
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions,
       });
       console.log("🚀 ~ createPasskey ~ credential:", credential);
       console.log("🚀 ~ createPasskey ~ credential.rawId:", credential.rawId);
-      rawId = credential.rawId;
-    } catch (error) {
-      console.error("Error creating passkey:", error);
-    }
-  };
+      // rawId = credential.rawId;
 
-  const verifyPasskey = async () => {
-    const publicKeyCredentialRequestOptions = {
-      challenge: new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]),
-      allowCredentials: [
+      handleSaveAfterRegsiterationOutput(
         {
-          id: rawId,
-          type: "public-key",
-          // transports: ['usb', 'ble', 'nfc'],
-        },
-      ],
-      rpId: window.location.hostname,
-      timeout: 60000,
-    };
-
-    const assertion = await navigator.credentials.get({
-      publicKey: publicKeyCredentialRequestOptions,
-    });
-    console.log("🚀 ~ verifyPasskey ~ assertion:", assertion);
-    handleSave(
-      {
-        ID: assertion.id,
-        RawID: arrayBufferToBase64(assertion.rawId),
-        Type: assertion.type,
-        response: {
-          ClientDataJson: arrayBufferToBase64(assertion.response.clientDataJSON),
-          AttestationObject: arrayBufferToBase64(assertion.response.authenticatorData),
+          id: credential.id,
+          raw_id: arrayBufferToBase64(credential.rawId),
+          type: credential.type,
+          response: {
+            client_data_json: arrayBufferToBase64(credential.response.clientDataJSON),
+            attestation_object:arrayBufferToBase64(credential.response.attestationObject),
+          }
         }
-      }
-    );
+      );
+    // } catch (error) {
+    //   console.error("Error creating passkey:", error);
+    // }
+
+    
+
+    
   };
+
+
+
+  // const verifyPasskey = async () => {
+  //   const publicKeyCredentialRequestOptions = {
+  //     challenge: new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]),
+  //     allowCredentials: [
+  //       {
+  //         id: rawId,
+  //         type: "public-key",
+  //         // transports: ['usb', 'ble', 'nfc'],
+  //       },
+  //     ],
+  //     rpId: window.location.hostname,
+  //     timeout: 60000,
+  //   };
+
+  //   const assertion = await navigator.credentials.get({
+  //     publicKey: publicKeyCredentialRequestOptions,
+  //   });
+  //   console.log("🚀 ~ verifyPasskey from webauthn directly is  ~ assertion:", assertion);
+
+  //   handleSave(
+  //     {
+  //       id: assertion.id,
+  //       raw_id: arrayBufferToBase64(assertion.rawId),
+  //       type: assertion.type,
+  //       response: {
+  //         client_data_json: arrayBufferToBase64(assertion.response.clientDataJSON),
+  //         authenticator_data:arrayBufferToBase64(assertion.response.authenticatorData),
+  //         signature: arrayBufferToBase64(assertion.response.signature),
+  //         user_handle: arrayBufferToBase64(assertion.response.userHandle),
+  //       }
+  //     }
+  //   );
+
+  
+
+  // };
+
+
+
 
   return (
     <>
       <div>
         <CardPaymentForm
-          createPasskey={createPasskey}
-          verifyPasskey={verifyPasskey}
+          createPasskey={registerUser}
+          // verifyPasskey={verifyPasskey}
         />
       </div>
     </>
