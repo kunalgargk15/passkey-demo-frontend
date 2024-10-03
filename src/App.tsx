@@ -24,19 +24,11 @@ function App() {
     return btoa(binary);  // Base64 encode
   };
 
-  function base64ToArrayBuffer(base64) {
-    // Decode the base64 string
-    // const binaryString = atob(base64);
-    
-    // Create an array of bytes from the decoded string
-    const len = base64.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = base64.charCodeAt(i);
-    }
-    
-    // Convert the byte array to an ArrayBuffer
-    return bytes.buffer;
+  function base64ToArrayBuffer(base64Input) {
+   
+    const bytes = new Uint8Array(base64Input);
+    return bytes
+  
   }
 
 
@@ -100,32 +92,34 @@ function App() {
 
       const publicKeyCredentialCreationOptions = await response.json();
 
+      console.log("Printing the create options received from backend RAW", publicKeyCredentialCreationOptions) 
       publicKeyCredentialCreationOptions.challenge = base64ToArrayBuffer(publicKeyCredentialCreationOptions.challenge)
       publicKeyCredentialCreationOptions.user.id = base64ToArrayBuffer(publicKeyCredentialCreationOptions.user.id)
 
 
       console.log("Printing the create options received from backend", publicKeyCredentialCreationOptions)
-    // try {
+    try {
       const credential = await navigator.credentials.create({
         publicKey: publicKeyCredentialCreationOptions,
       });
       console.log("🚀 ~ createPasskey ~ credential:", credential);
-      console.log("🚀 ~ createPasskey ~ credential.rawId:", credential.rawId);
+      // console.log("🚀 ~ createPasskey ~ credential.rawId:", credential.rawId);
       // rawId = credential.rawId;
+      console.log("🚀 ~ createPasskey ~ credential.challenge  is:", credential.challenge);
+      handleSaveAfterRegsiterationOutput(credential);
 
-      handleSaveAfterRegsiterationOutput(
-        {
-          id: credential.id,
-          raw_id: arrayBufferToBase64(credential.rawId),
-          type: credential.type,
-          response: {
-            client_data_json: arrayBufferToBase64(credential.response.clientDataJSON),
-            attestation_object:arrayBufferToBase64(credential.response.attestationObject),
-          }
-        }
-      );
-    // } catch (error) {
-    //   console.error("Error creating passkey:", error);
+    } catch (error) {
+      console.error("Error creating passkey:", error);
+    }
+
+    // {
+    //   id: credential.id,
+    //   raw_id: (credential.rawId),
+    //   type: credential.type,
+    //   response: {
+    //     client_data_json: (credential.response.clientDataJSON),
+    //     attestation_object:(credential.response.attestationObject),
+    //   }
     // }
 
     
