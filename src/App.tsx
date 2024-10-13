@@ -39,16 +39,31 @@ function App() {
   
   }
 
+  
 
   const handleSaveAfterRegsiterationOutput = async (responseData) => {
     console.log("🚀 ~ handleSave ~ responseData:", responseData)
+
+    // Convert responseData to JSON string
+    const jsonString = JSON.stringify(responseData);
+        
+    // Convert to Uint8Array
+    const encoder = new TextEncoder();
+    const byteArray = encoder.encode(jsonString);
+    
+    // Convert to Base64 string
+    const base64String = btoa(String.fromCharCode(...byteArray));
+
     try {
-      const response = await fetch('http://localhost:8080/save', {
+      const response = await fetch('https://checkout-service-varunbgit.dev.razorpay.in/v1/customer/passkey_registration/option/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body:  JSON.stringify(responseData),
+        body: JSON.stringify({
+          contact_no: "8955496900",
+          credential: (base64String),
+      }),
       });
 
       if (!response.ok) {
@@ -154,11 +169,11 @@ function App() {
         }
       );
       const responseData = await response.json();
-      console.log(
-        '🚀 ~ fetchVerifyOptions ~ response:',
-        responseData.publicKey.allowCredentials[0]
-      );
-      return responseData.publicKey;
+      // console.log(
+      //   '🚀 ~ fetchVerifyOptions ~ response:',
+      //   responseData.publicKey.allowCredentials[0]
+      // );
+      return responseData;
     } catch (error) {
       console.error('Error:', error);
       throw error;
@@ -167,7 +182,7 @@ function App() {
 
   async function completeVerification(assertion) {
     try {
-      const response = await fetch('http://localhost:8080/complete_verification', {
+      const response = await fetch('https://checkout-service-varunbgit.dev.razorpay.in/v1/customer/authentication/option/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
