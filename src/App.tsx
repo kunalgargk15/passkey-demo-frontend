@@ -87,11 +87,14 @@ function App() {
   async function registerUser() {
     
       // Fetch public key credential creation options from the backend
-      const response = await fetch('http://localhost:8080/register', {
+      const response = await fetch('https://checkout-service-varunbgit.dev.razorpay.in/v1/customer/passkey_registration/generate_option', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          "contact_no": "8955496900"
+        })
       });
   
       if (!response.ok) {
@@ -139,12 +142,15 @@ function App() {
   async function fetchVerifyOptions() {
     try {
       const response = await fetch(
-        'http://localhost:8080/create_verify_options',
+        'https://checkout-service-varunbgit.dev.razorpay.in/v1/customer/passkey_verification/generate_option',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            "contact_no": "8955496900"
+          })
         }
       );
       const responseData = await response.json();
