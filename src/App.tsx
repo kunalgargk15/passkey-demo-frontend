@@ -181,13 +181,27 @@ function App() {
   }
 
   async function completeVerification(assertion) {
+
+     // Convert responseData to JSON string
+     const jsonString = JSON.stringify(assertion);
+        
+     // Convert to Uint8Array
+     const encoder = new TextEncoder();
+     const byteArray = encoder.encode(jsonString);
+     
+     // Convert to Base64 string
+     const base64String = btoa(String.fromCharCode(...byteArray));
+
     try {
       const response = await fetch('https://checkout-service-varunbgit.dev.razorpay.in/v1/customer/authentication/option/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body:  JSON.stringify(assertion),
+        body:  JSON.stringify({
+          "contact_no": "8955496900",
+          "assertion_data": base64String
+          }),
       });
 
       if (!response.ok) {
@@ -195,6 +209,8 @@ function App() {
       }
 
       const data = await response.json();
+      console.log("data in the complete verification flow is " ,data)
+
     } catch (error) {
       console.error('Error:', error);
     }
